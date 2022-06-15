@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,11 @@
  */
 package brut.androlib.decode;
 
+import brut.androlib.*;
+import brut.common.BrutException;
+import brut.directory.DirectoryException;
+import brut.directory.ExtFile;
+import brut.util.OS;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,23 +30,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import brut.androlib.Androlib;
-import brut.androlib.AndrolibException;
-import brut.androlib.ApkDecoder;
-import brut.androlib.BaseTest;
-import brut.androlib.TestUtils;
-import brut.common.BrutException;
-import brut.directory.DirectoryException;
-import brut.directory.ExtFile;
-import brut.util.OS;
-
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Adib Faramarzi <adibfara@gmail.com>
- */
 public class DecodeKotlinCoroutinesTest extends BaseTest {
-    private static String apk = "test-kotlin-coroutines.apk";
+    private static final String apk = "test-kotlin-coroutines.apk";
 
     @BeforeClass
     public static void beforeClass() throws Exception {

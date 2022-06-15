@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,25 +21,23 @@ import brut.androlib.ApkDecoder;
 import brut.androlib.BaseTest;
 import brut.androlib.TestUtils;
 import brut.androlib.meta.MetaInfo;
-import brut.directory.ExtFile;
 import brut.common.BrutException;
+import brut.directory.ExtFile;
 import brut.util.OS;
-
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.Map;
-
 import brut.util.OSDetection;
-import org.junit.*;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
-/**
- * @author Ryszard Wiśniewski <brut.alll@gmail.com>
- */
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
+
 public class BuildAndDecodeTest extends BaseTest {
 
     @BeforeClass
@@ -178,7 +176,7 @@ public class BuildAndDecodeTest extends BaseTest {
     public void storedMp3FilesAreNotCompressedTest() throws BrutException {
         ExtFile extFile = new ExtFile(sTmpDir, "testapp.apk");
         Integer built = extFile.getDirectory().getCompressionLevel("res/raw/rain.mp3");
-        assertEquals(new Integer(0), built);
+        assertEquals(Integer.valueOf(0), built);
     }
 
     @Test
@@ -493,12 +491,18 @@ public class BuildAndDecodeTest extends BaseTest {
     }
 
     @Test
-    public void confirmZeroByteFileIsNotStored() throws BrutException {
+    public void confirmZeroByteFileExtensionIsNotStored() throws BrutException {
         MetaInfo metaInfo = new Androlib().readMetaFile(sTestNewDir);
 
         for (String item : metaInfo.doNotCompress) {
-            assertNotSame(item, "empty");
+            assertNotEquals("jpg", item);
         }
+    }
+
+    @Test
+    public void confirmZeroByteFileIsStored() throws BrutException {
+        MetaInfo metaInfo = new Androlib().readMetaFile(sTestNewDir);
+        assertTrue(metaInfo.doNotCompress.contains("assets/0byte_file.jpg"));
     }
 
     @Test
@@ -546,11 +550,21 @@ public class BuildAndDecodeTest extends BaseTest {
     @Test
     public void multipleDexTest() throws BrutException, IOException {
         compareBinaryFolder("/smali_classes2", false);
+        compareBinaryFolder("/smali_classes3", false);
+
+        File classes2Dex = new File(sTestOrigDir, "build/apk/classes2.dex");
+        File classes3Dex = new File(sTestOrigDir, "build/apk/classes3.dex");
+
+        assertTrue(classes2Dex.isFile());
+        assertTrue(classes3Dex.isFile());
     }
 
     @Test
     public void singleDexTest() throws BrutException, IOException {
         compareBinaryFolder("/smali", false);
+
+        File classesDex = new File(sTestOrigDir, "build/apk/classes.dex");
+        assertTrue(classesDex.isFile());
     }
 
     @Test

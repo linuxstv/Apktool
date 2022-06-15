@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package brut.androlib.aapt2;
 
 import brut.androlib.*;
 import brut.androlib.meta.MetaInfo;
+import brut.androlib.options.BuildOptions;
 import brut.common.BrutException;
 import brut.directory.ExtFile;
 import brut.util.OS;
@@ -30,9 +31,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Ryszard Wiśniewski <brut.alll@gmail.com>
- */
 public class BuildAndDecodeTest extends BaseTest {
 
     @BeforeClass
@@ -45,13 +43,13 @@ public class BuildAndDecodeTest extends BaseTest {
         LOGGER.info("Unpacking testapp...");
         TestUtils.copyResourceDir(BuildAndDecodeTest.class, "aapt2/testapp/", sTestOrigDir);
 
-        ApkOptions apkOptions = new ApkOptions();
-        apkOptions.useAapt2 = true;
-        apkOptions.verbose = true;
+        BuildOptions buildOptions = new BuildOptions();
+        buildOptions.useAapt2 = true;
+        buildOptions.verbose = true;
 
         LOGGER.info("Building testapp.apk...");
         File testApk = new File(sTmpDir, "testapp.apk");
-        new Androlib(apkOptions).build(sTestOrigDir, testApk);
+        new Androlib(buildOptions).build(sTestOrigDir, testApk);
 
         LOGGER.info("Decoding testapp.apk...");
         ApkDecoder apkDecoder = new ApkDecoder(testApk);
@@ -80,9 +78,15 @@ public class BuildAndDecodeTest extends BaseTest {
     }
 
     @Test
-    public void confirmZeroByteFileIsNotStored() throws BrutException {
+    public void confirmZeroByteFileExtensionIsNotStored() throws BrutException {
         MetaInfo metaInfo = new Androlib().readMetaFile(sTestNewDir);
-        assertNull(metaInfo.doNotCompress);
+        assertFalse(metaInfo.doNotCompress.contains("jpg"));
+    }
+
+    @Test
+    public void confirmZeroByteFileIsStored() throws BrutException {
+        MetaInfo metaInfo = new Androlib().readMetaFile(sTestNewDir);
+        assertTrue(metaInfo.doNotCompress.contains("assets/0byte_file.jpg"));
     }
 
     @Test
@@ -98,6 +102,10 @@ public class BuildAndDecodeTest extends BaseTest {
     @Test
     public void leadingDollarSignResourceNameTest() throws BrutException {
         compareXmlFiles("res/drawable/$avd_hide_password__0.xml");
+        compareXmlFiles("res/drawable/$avd_show_password__0.xml");
+        compareXmlFiles("res/drawable/$avd_show_password__1.xml");
+        compareXmlFiles("res/drawable/$avd_show_password__2.xml");
+        compareXmlFiles("res/drawable/avd_show_password.xml");
     }
 
     @Test
@@ -113,5 +121,25 @@ public class BuildAndDecodeTest extends BaseTest {
     @Test
     public void xmlXsdFileTest() throws BrutException {
         compareXmlFiles("res/xml/ww_box_styles_schema.xsd");
+    }
+
+    @Test
+    public void multipleDexTest() throws BrutException, IOException {
+        compareBinaryFolder("/smali_classes2", false);
+        compareBinaryFolder("/smali_classes3", false);
+
+        File classes2Dex = new File(sTestOrigDir, "build/apk/classes2.dex");
+        File classes3Dex = new File(sTestOrigDir, "build/apk/classes3.dex");
+
+        assertTrue(classes2Dex.isFile());
+        assertTrue(classes3Dex.isFile());
+    }
+
+    @Test
+    public void singleDexTest() throws BrutException, IOException {
+        compareBinaryFolder("/smali", false);
+
+        File classesDex = new File(sTestOrigDir, "build/apk/classes.dex");
+        assertTrue(classesDex.isFile());
     }
 }

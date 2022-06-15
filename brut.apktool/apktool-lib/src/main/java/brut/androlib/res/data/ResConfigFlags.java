@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,6 @@ package brut.androlib.res.data;
 
 import java.util.logging.Logger;
 
-/**
- * @author Ryszard Wiśniewski <brut.alll@gmail.com>
- */
 public class ResConfigFlags {
     public final short mcc;
     public final short mnc;
@@ -537,10 +534,15 @@ public class ResConfigFlags {
     public final static byte SDK_OREO = 26;
     public final static byte SDK_OREO_MR1 = 27;
     public final static byte SDK_P = 28;
+    public final static byte SDK_Q = 29;
+    public final static byte SDK_R = 30;
+    public final static byte SDK_S = 31;
+    public final static byte SDK_S_V2 = 32;
+    public final static byte SDK_T = 33;
 
     // AOSP has this as 10,000 for dev purposes.
-    // platform_frameworks_base/commit/ad5b4ba2a2dda066dbefec4195b86747e3d7d225#diff-b2b93844110603a7b050476c83c1ee3a
-    public final static int SDK_Q = 10000;
+    // platform_frameworks_base/commit/c7a1109a1fe0771d4c9b572dcf178e2779fc4f2d
+    public final static int SDK_DEVELOPMENT = 10000;
 
     public final static byte ORIENTATION_ANY = 0;
     public final static byte ORIENTATION_PORT = 1;

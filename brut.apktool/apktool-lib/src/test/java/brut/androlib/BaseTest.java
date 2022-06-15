@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,9 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.*;
 
 public class BaseTest {
 
@@ -45,16 +44,16 @@ public class BaseTest {
 
         Map<String, String> controlFiles = control.unknownFiles;
         Map<String, String> testFiles = test.unknownFiles;
-        assertTrue(controlFiles.size() == testFiles.size());
+        assertEquals(controlFiles.size(), testFiles.size());
 
         // Make sure that the compression methods are still the same
         for (Map.Entry<String, String> controlEntry : controlFiles.entrySet()) {
-            assertTrue(controlEntry.getValue().equals(testFiles.get(controlEntry.getKey())));
+            assertEquals(controlEntry.getValue(), testFiles.get(controlEntry.getKey()));
         }
     }
 
     protected void compareBinaryFolder(String path, boolean res) throws BrutException, IOException {
-        Boolean exists = true;
+        boolean exists = true;
 
         String prefixPath = "";
         if (res) {

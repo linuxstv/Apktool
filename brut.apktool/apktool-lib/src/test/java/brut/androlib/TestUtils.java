@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,19 @@
  */
 package brut.androlib;
 
+import brut.androlib.options.BuildOptions;
 import brut.androlib.res.AndrolibResources;
 import brut.common.BrutException;
-import brut.directory.*;
+import brut.directory.DirUtil;
+import brut.directory.Directory;
+import brut.directory.FileDirectory;
+import brut.util.OS;
+import org.custommonkey.xmlunit.ElementQualifier;
+import org.w3c.dom.Element;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -26,14 +36,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import brut.util.OS;
-import org.custommonkey.xmlunit.ElementQualifier;
-import org.w3c.dom.Element;
-import org.xmlpull.v1.*;
-
-/**
- * @author Ryszard Wiśniewski <brut.alll@gmail.com>
- */
 public abstract class TestUtils {
 
     public static Map<String, String> parseStringsXml(File file)
@@ -44,7 +46,7 @@ public abstract class TestUtils {
 
             int eventType;
             String key = null;
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<>();
             while ((eventType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     case XmlPullParser.START_TAG:
@@ -77,14 +79,14 @@ public abstract class TestUtils {
         }
     }
 
-    public static void copyResourceDir(Class class_, String dirPath, File out) throws BrutException {
+    public static void copyResourceDir(Class<?> class_, String dirPath, File out) throws BrutException {
         if (!out.exists()) {
             out.mkdirs();
         }
         copyResourceDir(class_, dirPath, new FileDirectory(out));
     }
 
-    public static void copyResourceDir(Class class_, String dirPath, Directory out) throws BrutException {
+    public static void copyResourceDir(Class<?> class_, String dirPath, Directory out) throws BrutException {
         if (class_ == null) {
             class_ = Class.class;
         }
@@ -136,7 +138,7 @@ public abstract class TestUtils {
 
     static File getFrameworkDir() throws AndrolibException {
         AndrolibResources androlibResources = new AndrolibResources();
-        androlibResources.apkOptions = new ApkOptions();
+        androlibResources.buildOptions = new BuildOptions();
         return androlibResources.getFrameworkDir();
     }
 

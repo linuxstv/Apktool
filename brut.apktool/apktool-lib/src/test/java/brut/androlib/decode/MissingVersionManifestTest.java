@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import brut.androlib.ApkDecoder;
 import brut.androlib.BaseTest;
 import brut.androlib.TestUtils;
 import brut.androlib.meta.MetaInfo;
-import brut.directory.ExtFile;
 import brut.common.BrutException;
+import brut.directory.ExtFile;
 import brut.util.OS;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -31,11 +31,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-/**
- * @author Connor Tumbleson <connor.tumbleson@gmail.com>
- */
 public class MissingVersionManifestTest extends BaseTest {
 
     @BeforeClass
@@ -61,6 +58,6 @@ public class MissingVersionManifestTest extends BaseTest {
         apkDecoder.decode();
 
         MetaInfo metaInfo = new Androlib().readMetaFile(decodedApk);
-        assertEquals(null, metaInfo.versionInfo.versionName);
+        assertNull(metaInfo.versionInfo.versionName);
     }
 }

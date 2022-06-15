@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,11 +43,11 @@ public class MetaInfo {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
-        StringExRepresent representer = new StringExRepresent();
+        EscapedStringRepresenter representer = new EscapedStringRepresenter();
         PropertyUtils propertyUtils = representer.getPropertyUtils();
         propertyUtils.setSkipMissingProperties(true);
 
-        return new Yaml(new StringExConstructor(), representer, options);
+        return new Yaml(new ClassSafeConstructor(), representer, options);
     }
 
     public void save(Writer output) {
@@ -68,13 +68,5 @@ public class MetaInfo {
 
     public static MetaInfo load(InputStream is) {
         return getYaml().loadAs(is, MetaInfo.class);
-    }
-
-    public static MetaInfo load(File file) throws IOException {
-        try (
-                InputStream fis = new FileInputStream(file)
-        ) {
-            return load(fis);
-        }
     }
 }

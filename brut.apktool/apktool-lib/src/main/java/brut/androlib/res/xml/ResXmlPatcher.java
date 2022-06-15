@@ -1,12 +1,12 @@
-/**
- *  Copyright (C) 2019 Ryszard Wiśniewski <brut.alll@gmail.com>
- *  Copyright (C) 2019 Connor Tumbleson <connor.tumbleson@gmail.com>
+/*
+ *  Copyright (C) 2010 Ryszard Wiśniewski <brut.alll@gmail.com>
+ *  Copyright (C) 2010 Connor Tumbleson <connor.tumbleson@gmail.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,9 @@
  */
 package brut.androlib.res.xml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.logging.Logger;
+import brut.androlib.AndrolibException;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,30 +28,19 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.logging.Logger;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import brut.androlib.AndrolibException;
-
-/**
- * @author Connor Tumbleson <connor.tumbleson@gmail.com>
- */
 public final class ResXmlPatcher {
 
     /**
      * Removes "debug" tag from file
      *
      * @param file AndroidManifest file
-     * @throws AndrolibException
+     * @throws AndrolibException Error reading Manifest file
      */
     public static void removeApplicationDebugTag(File file) throws AndrolibException {
         if (file.exists()) {
@@ -77,18 +65,112 @@ public final class ResXmlPatcher {
     }
 
     /**
-     * Any @string reference in a <provider> value in AndroidManifest.xml will break on
+     * Sets "debug" tag in the file to true
+     *
+     * @param file AndroidManifest file
+     */
+    public static void setApplicationDebugTagTrue(File file) {
+        if (file.exists()) {
+            try {
+                Document doc = loadDocument(file);
+                Node application = doc.getElementsByTagName("application").item(0);
+
+                // load attr
+                NamedNodeMap attr = application.getAttributes();
+                Node debugAttr = attr.getNamedItem("android:debuggable");
+
+                if (debugAttr == null) {
+                    debugAttr = doc.createAttribute("android:debuggable");
+                    attr.setNamedItem(debugAttr);
+                }
+
+                // set application:debuggable to 'true
+                debugAttr.setNodeValue("true");
+
+                saveDocument(file, doc);
+
+            } catch (SAXException | ParserConfigurationException | IOException | TransformerException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Sets the value of the network security config in the AndroidManifest file
+     *
+     * @param file AndroidManifest file
+     */
+    public static void setNetworkSecurityConfig(File file) {
+        if (file.exists()) {
+            try {
+                Document doc = loadDocument(file);
+                Node application = doc.getElementsByTagName("application").item(0);
+
+                // load attr
+                NamedNodeMap attr = application.getAttributes();
+                Node netSecConfAttr = attr.getNamedItem("android:networkSecurityConfig");
+
+                if (netSecConfAttr == null) {
+                    // there is not an already existing network security configuration
+                    netSecConfAttr = doc.createAttribute("android:networkSecurityConfig");
+                    attr.setNamedItem(netSecConfAttr);
+                }
+
+                // whether it already existed or it was created now set it to the proper value
+                netSecConfAttr.setNodeValue("@xml/network_security_config");
+
+                saveDocument(file, doc);
+
+            } catch (SAXException | ParserConfigurationException | IOException | TransformerException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Creates a modified network security config file that is more permissive
+     *
+     * @param file network security config file
+     */
+    public static void modNetworkSecurityConfig(File file)
+        throws ParserConfigurationException, TransformerException, IOException, SAXException {
+
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+        Document document = documentBuilder.newDocument();
+
+        Element root = document.createElement("network-security-config");
+        document.appendChild(root);
+        Element baseConfig = document.createElement("base-config");
+        root.appendChild(baseConfig);
+        Element trustAnchors = document.createElement("trust-anchors");
+        baseConfig.appendChild(trustAnchors);
+
+        Element certSystem = document.createElement("certificates");
+        Attr attrSystem = document.createAttribute("src");
+        attrSystem.setValue("system");
+        certSystem.setAttributeNode(attrSystem);
+        trustAnchors.appendChild(certSystem);
+
+        Element certUser = document.createElement("certificates");
+        Attr attrUser = document.createAttribute("src");
+        attrUser.setValue("user");
+        certUser.setAttributeNode(attrUser);
+        trustAnchors.appendChild(certUser);
+
+        saveDocument(file, document);
+    }
+
+    /**
+     * Any @string reference in a provider value in AndroidManifest.xml will break on
      * build, thus preventing the application from installing. This is from a bug/error
      * in AOSP where public resources cannot be part of an authorities attribute within
-     * a <provider> tag.
+     * a provider tag.
      *
      * This finds any reference and replaces it with the literal value found in the
      * res/values/strings.xml file.
      *
      * @param file File for AndroidManifest.xml
-     * @throws AndrolibException
      */
-    public static void fixingPublicAttrsInProviderAttributes(File file) throws AndrolibException {
+    public static void fixingPublicAttrsInProviderAttributes(File file) {
         boolean saved = false;
         if (file.exists()) {
             try {
@@ -149,9 +231,8 @@ public final class ResXmlPatcher {
      * @param saved boolean on whether we need to save
      * @param provider Node we are attempting to replace
      * @return boolean
-     * @throws AndrolibException setting node value failed
      */
-    private static boolean isSaved(File file, boolean saved, Node provider) throws AndrolibException {
+    private static boolean isSaved(File file, boolean saved, Node provider) {
         String reference = provider.getNodeValue();
         String replacement = pullValueFromStrings(file.getParentFile(), reference);
 
@@ -168,9 +249,8 @@ public final class ResXmlPatcher {
      * @param directory Root directory of apk
      * @param key String reference (ie @string/foo)
      * @return String|null
-     * @throws AndrolibException
      */
-    public static String pullValueFromStrings(File directory, String key) throws AndrolibException {
+    public static String pullValueFromStrings(File directory, String key) {
         if (key == null || ! key.contains("@")) {
             return null;
         }
@@ -203,9 +283,8 @@ public final class ResXmlPatcher {
      * @param directory Root directory of apk
      * @param key Integer reference (ie @integer/foo)
      * @return String|null
-     * @throws AndrolibException
      */
-    public static String pullValueFromIntegers(File directory, String key) throws AndrolibException {
+    public static String pullValueFromIntegers(File directory, String key) {
         if (key == null || ! key.contains("@")) {
             return null;
         }
@@ -236,9 +315,8 @@ public final class ResXmlPatcher {
      * Removes attributes like "versionCode" and "versionName" from file.
      *
      * @param file File representing AndroidManifest.xml
-     * @throws AndrolibException
      */
-    public static void removeManifestVersions(File file) throws AndrolibException {
+    public static void removeManifestVersions(File file) {
         if (file.exists()) {
             try {
                 Document doc = loadDocument(file);
@@ -265,9 +343,8 @@ public final class ResXmlPatcher {
      *
      * @param file File for AndroidManifest.xml
      * @param packageOriginal Package name to replace
-     * @throws AndrolibException
      */
-    public static void renameManifestPackage(File file, String packageOriginal) throws AndrolibException {
+    public static void renameManifestPackage(File file, String packageOriginal) {
         try {
             Document doc = loadDocument(file);
 
@@ -309,11 +386,8 @@ public final class ResXmlPatcher {
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
         // Not using the parse(File) method on purpose, so that we can control when
         // to close it. Somehow parse(File) does not seem to close the file in all cases.
-        FileInputStream inputStream = new FileInputStream(file);
-        try {
-        	return docBuilder.parse(inputStream);
-        } finally {
-        	inputStream.close();
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return docBuilder.parse(inputStream);
         }
     }
 
